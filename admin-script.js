@@ -57,15 +57,17 @@ async function deleteAllFromGoogleSheets() {
     }
 }
 
-async function syncFromGoogleSheets() {
+async function loadOrders() {
     if (GOOGLE_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzHiBNWVZmaBjcTFk7i9nJhkBreW7V-Qp9MdkZiH0GcmIuAy85nokmelSsz9HSKsGu9WQ/exec') {
-        showNotification('⚠️ Chưa cấu hình Google Sheets URL');
+        console.warn('Google Sheets URL chưa được cấu hình');
+        const savedOrders = localStorage.getItem('foodOrders');
+        orders = savedOrders ? JSON.parse(savedOrders) : [];
+        updateStats();
+        displayOrders();
         return;
     }
     
     try {
-        showNotification('🔄 Đang đồng bộ từ Google Sheets...');
-        
         const response = await fetch(GOOGLE_SCRIPT_URL);
         const result = await response.json();
         
@@ -74,21 +76,21 @@ async function syncFromGoogleSheets() {
             localStorage.setItem('foodOrders', JSON.stringify(orders));
             updateStats();
             displayOrders();
-            showNotification(`✅ Đã đồng bộ ${orders.length} đơn hàng từ Google Sheets!`);
+            console.log(`Đã tải ${orders.length} đơn hàng từ Google Sheets`);
         } else {
-            showNotification('❌ Lỗi: ' + (result.message || 'Không thể tải dữ liệu'));
+            console.error('Lỗi khi tải dữ liệu:', result.message);
+            const savedOrders = localStorage.getItem('foodOrders');
+            orders = savedOrders ? JSON.parse(savedOrders) : [];
+            updateStats();
+            displayOrders();
         }
     } catch (error) {
-        console.error('Lỗi khi đồng bộ:', error);
-        showNotification('❌ Lỗi khi đồng bộ từ Google Sheets');
+        console.error('Lỗi khi tải từ Google Sheets:', error);
+        const savedOrders = localStorage.getItem('foodOrders');
+        orders = savedOrders ? JSON.parse(savedOrders) : [];
+        updateStats();
+        displayOrders();
     }
-}
-
-function loadOrders() {
-    const savedOrders = localStorage.getItem('foodOrders');
-    orders = savedOrders ? JSON.parse(savedOrders) : [];
-    updateStats();
-    displayOrders();
 }
 
 function updateStats() {
@@ -191,7 +193,7 @@ function displayOrders() {
                 <div class="order-actions">
                     <button class="btn-view" onclick="event.stopPropagation(); showOrderDetail(${orders.indexOf(order)})">Xem chi tiết</button>
                     <button class="btn-delete" onclick="event.stopPropagation(); deleteOrder(${orders.indexOf(order)})">Xóa</button>
-                </div>
+                </div>git add .
             </div>
         `;
     }).join('');
