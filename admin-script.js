@@ -58,40 +58,19 @@ async function deleteAllFromGoogleSheets() {
 }
 
 async function loadOrders() {
-    if (GOOGLE_SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE') {
-        console.warn('Google Sheets URL chưa được cấu hình');
-        const savedOrders = localStorage.getItem('foodOrders');
-        orders = savedOrders ? JSON.parse(savedOrders) : [];
-        updateStats();
-        displayOrders();
-        return;
-    }
-    
-    try {
-        const response = await fetch(GOOGLE_SCRIPT_URL);
-        const result = await response.json();
-        
-        if (result.status === 'success' && result.data) {
-            orders = result.data;
-            localStorage.setItem('foodOrders', JSON.stringify(orders));
-            updateStats();
-            displayOrders();
-            console.log(`Đã tải ${orders.length} đơn hàng từ Google Sheets`);
-        } else {
-            console.error('Lỗi khi tải dữ liệu:', result.message);
-            const savedOrders = localStorage.getItem('foodOrders');
-            orders = savedOrders ? JSON.parse(savedOrders) : [];
-            updateStats();
-            displayOrders();
-        }
-    } catch (error) {
-        console.error('Lỗi khi tải từ Google Sheets:', error);
-        const savedOrders = localStorage.getItem('foodOrders');
-        orders = savedOrders ? JSON.parse(savedOrders) : [];
-        updateStats();
-        displayOrders();
-    }
+    await syncFromGoogleSheets();
 }
+
+// Auto-refresh every 30 seconds
+setInterval(async () => {
+    console.log('Tự động làm mới dữ liệu từ Google Sheets...');
+    await syncFromGoogleSheets();
+}, 30000);
+
+// Show notification when page loads
+window.addEventListener('load', () => {
+    showNotification('🔄 Đang tải dữ liệu từ Google Sheets...');
+});
 
 function updateStats() {
     const totalOrders = orders.length;
@@ -410,5 +389,32 @@ document.addEventListener('keydown', (e) => {
         closeOrderDetail();
     }
 });
+
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4caf50;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 50px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 2000);
+}
 
 loadOrders();
