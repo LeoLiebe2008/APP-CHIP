@@ -193,7 +193,7 @@ function displayOrders() {
                 <div class="order-actions">
                     <button class="btn-view" onclick="event.stopPropagation(); showOrderDetail(${orders.indexOf(order)})">Xem chi tiết</button>
                     <button class="btn-delete" onclick="event.stopPropagation(); deleteOrder(${orders.indexOf(order)})">Xóa</button>
-                </div>git add .
+                </div>
             </div>
         `;
     }).join('');
