@@ -58,7 +58,7 @@ async function deleteAllFromGoogleSheets() {
 }
 
 async function syncFromGoogleSheets() {
-    if (GOOGLE_SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE') {
+    if (GOOGLE_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzHiBNWVZmaBjcTFk7i9nJhkBreW7V-Qp9MdkZiH0GcmIuAy85nokmelSsz9HSKsGu9WQ/exec') {
         console.warn('Google Sheets URL chưa được cấu hình');
         const savedOrders = localStorage.getItem('foodOrders');
         orders = savedOrders ? JSON.parse(savedOrders) : [];
